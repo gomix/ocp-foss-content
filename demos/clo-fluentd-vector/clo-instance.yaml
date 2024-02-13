@@ -17,7 +17,6 @@ spec:
     elasticsearch:
       nodeCount: 1 
       storage:
-        storageClassName: ocs-external-storagecluster-ceph-rbd
         size: 5G
       resources: 
           limits:

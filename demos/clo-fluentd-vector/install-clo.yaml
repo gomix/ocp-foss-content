@@ -44,8 +44,7 @@ metadata:
   name: cluster-logging
   namespace: openshift-logging 
 spec:
-  targetNamespaces:
-  - ""
+  upgradeStrategy: Default
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
