@@ -1,0 +1,28 @@
+---
+# Simulating an external ElasticSearch instance
+---
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  name: cu-external-es
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: cu-external-es
+  namespace: cu-external-es
+spec:
+  targetNamespaces:
+  - cu-external-es
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:   
+  name: elasticsearch-operator   
+  namespace: cu-external-es
+spec:   
+  channel: stable-5.8
+  installPlanApproval: Automatic    
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace   
+  name: elasticsearch-operator
