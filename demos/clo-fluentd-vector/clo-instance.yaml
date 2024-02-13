@@ -15,9 +15,10 @@ spec:
       audit:
         maxAge: 1d
     elasticsearch:
+      storage: {}
+        #        storageClassName: ocs-external-storagecluster-ceph-rbd
+        #        size: 5G
       nodeCount: 1 
-      storage:
-        size: 5G
       resources: 
           limits:
             memory: 16Gi
