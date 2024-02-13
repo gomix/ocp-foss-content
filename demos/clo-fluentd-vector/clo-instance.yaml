@@ -16,8 +16,9 @@ spec:
         maxAge: 1d
     elasticsearch:
       storage: {}
-        #        storageClassName: ocs-external-storagecluster-ceph-rbd
-        #        size: 5G
+      # storage:
+      #   storageClassName: ocs-external-storagecluster-ceph-rbd
+      #   size: 5G
       nodeCount: 1 
       resources: 
           limits:
@@ -36,5 +37,5 @@ spec:
     kibana:
       replicas: 1
   collection:
-    type: fluentd 
-    fluentd: {}
+    type: vector
+    # type: fluentd 
