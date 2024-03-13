@@ -1,0 +1,21 @@
+apiVersion: logging.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: my-clf
+  namespace: my-app
+spec:
+  serviceAccountName: my-sa
+  outputs:
+    - name: external-es
+      type: elasticsearch
+      version: 7
+      url: https://external.elasticsearch.com:9200
+      secret:
+        name: external-es-secret
+  pipelines:
+    - name: audit-infra-logs
+      inputRefs:
+        - audit
+        - infrastructure
+      outputRefs:
+        - external-es

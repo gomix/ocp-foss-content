@@ -32,10 +32,6 @@ spec:
           requests:
             memory: 256Mi
       redundancyPolicy: ZeroRedundancy
-  visualization:
-    type: kibana 
-    kibana:
-      replicas: 1
   collection:
     type: vector
     # type: fluentd 

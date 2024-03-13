@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"labels":{"app":"httpd-example"},"name":"httpd-example-2","namespace":"external-ip"},"spec":{"externalIPs":["192.168.132.252"],"ports":[{"name":"web","port":8080,"protocol":"TCP","targetPort":8080}],"selector":{"name":"httpd-example"},"type":"LoadBalancer"}}
+  creationTimestamp: "2024-03-06T10:27:06Z"
+  labels:
+    app: httpd-example
+  name: httpd-example-2
+  namespace: external-ip
+  resourceVersion: "1933876"
+  uid: 09e9ee93-9824-428a-aecd-a02fceb506f0
+spec:
+  type: LoadBalancer
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  externalIPs:
+  - 192.168.132.252
+  ports:
+  - name: web
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+    nodePort: 31227
+  selector:
+    name: httpd-example
+  sessionAffinity: None
+  allocateLoadBalancerNodePorts: true
+  clusterIP: 172.31.89.50
+  clusterIPs:
+  - 172.31.89.50
+  externalTrafficPolicy: Cluster
+

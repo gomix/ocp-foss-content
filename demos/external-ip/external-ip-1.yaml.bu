@@ -1,0 +1,60 @@
+---
+# create ns
+---
+apiVersion: v1 
+kind: Namespace 
+metadata:   
+  name: external-ip
+---
+# create app
+---
+apiVersion: apps/v1 
+kind: Deployment 
+metadata:   
+  name: nginx
+  namespace: external-ip
+  labels:
+    app: nginx 
+spec:
+  replicas: 1   
+  selector:
+    matchLabels:
+      app: nginx  
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 8000
+---
+# create svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+  namespace: external-ip
+spec:
+  clusterIP: 172.31.125.149
+  clusterIPs:
+  - 172.31.125.149
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: nginx
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

@@ -1,0 +1,72 @@
+---
+# create my-app ns 
+---
+apiVersion: v1 
+kind: Namespace 
+metadata:   
+  name: my-app
+---
+# create my-sa sa 
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-sa
+  namespace: my-app
+---
+# create cluster role binding
+# From CLO 5.8 we provide the following cluster roles:
+# - collect-audit-logs
+# - collect-application-logs
+# - collect-infrastructure-logs
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: collect-audit-logs
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: collect-audit-logs
+subjects:
+- kind: ServiceAccount
+  name: my-sa
+  namespace: my-app
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: collect-infrastructure-logs
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: collect-infrastructure-logs
+subjects:
+- kind: ServiceAccount
+  name: my-sa
+  namespace: my-app
+---
+# create my cluster log forwarder in my ns
+---
+apiVersion: logging.openshift.io/v1
+kind: ClusterLogForwarder
+metadata:
+  name: my-clf
+  namespace: my-app
+spec:
+  serviceAccountName: my-sa
+  outputs:
+    - name: external-es
+      type: elasticsearch
+      elasticsearch:
+        version: 7
+      url: https://external.elasticsearch.com:9200
+      secret:
+        name: my-external-es-secret
+  pipelines:
+    - name: audit-infra-logs
+      inputRefs:
+        - audit
+        - infrastructure
+      outputRefs:
+        - external-es

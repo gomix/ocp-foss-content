@@ -1,0 +1,107 @@
+---
+# configure external autoassign
+---
+apiVersion: config.openshift.io/v1 
+kind: Network
+metadata:   
+  name: cluster
+spec:
+  externalIP:
+    autoAssignCIDRs:
+    - 192.168.133.254/29
+    policy: {}
+---
+# create ns
+---
+apiVersion: v1 
+kind: Namespace 
+metadata:   
+  name: external-ip
+---
+# create app
+---
+apiVersion: apps/v1 
+kind: Deployment 
+metadata:   
+  name: fedora
+  namespace: external-ip
+  labels:
+    app: fedora 
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fedora  
+  template:
+    metadata:
+      labels:
+        app: fedora
+    spec:
+      containers:
+      - name: fedora
+        image: registry.fedoraproject.org/fedora-minimal:rawhide 
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do echo hello; sleep 10; done"]
+        ports:
+        - containerPort: 8000
+---
+# create ClusterIP svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: fedora
+  name: fedora
+  namespace: external-ip
+spec:
+  type: ClusterIP
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: fedora
+  sessionAffinity: None
+---
+# create LoadBalancer svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: fedora
+  name: fedora-lb
+  namespace: external-ip
+spec:
+  type: LoadBalancer
+  externalIPs:
+  - 192.168.132.253
+  selector:
+    app: fedora
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 8000
+---
+# create LoadBalancer svc 2
+---
+apiVersion: v1
+kind: Service
+getadata:
+  labels:
+    app: fedora
+  name: fedora-lb2
+  namespace: external-ip
+spec:
+  type: LoadBalancer
+  selector:
+    app: fedora
+  ports:
+  - port: 8000
+    protocol: TCP
+    targetPort: 8000

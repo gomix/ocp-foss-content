@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    description: Testing External IP
+  labels:
+    app: httpd-example
+    template: httpd-example
+  name: httpd-example-external-ip
+spec:
+  type: LoadBalancer
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  externalIPs:
+  - 192.168.132.252
+  ports:
+  - name: web
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    name: httpd-example
+  sessionAffinity: None
