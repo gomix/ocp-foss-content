@@ -10,6 +10,7 @@ metadata:
     circleci.com/project-slug: github/example-org/artist-website
   tags:
     - java
+    - java2
   links:
     - url: https://admin.example-org.com
       title: Admin Dashboard
