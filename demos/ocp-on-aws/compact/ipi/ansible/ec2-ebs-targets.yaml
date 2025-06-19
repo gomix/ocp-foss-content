@@ -1,0 +1,81 @@
+--- 
+- name: Attach EBS Volumes to OpenShift EC2 Instances
+  hosts: localhost
+  gather_facts: no 
+  become: no
+  vars_files:
+    - vars/aws.yaml
+
+  tasks:
+  - name: Load OpenShift metadata.json
+    ansible.builtin.slurp:
+      src: ../metadata.json
+    register: metadata_json_raw
+
+  - name: Parse metadata.json
+    ansible.builtin.set_fact:
+      metadata_json: "{{ metadata_json_raw['content'] | b64decode | from_json }}"
+
+  - name: Get available EBS volumes
+    amazon.aws.ec2_vol_info:
+      region: "{{ aws_region }}"
+      filters:
+        "tag:Environment": "{{ metadata_json.infraID }}-odf"
+    register: odf_volumes
+
+  - debug:
+      var: odf_volumes
+
+  - name: Get OpenShift EC2 instances
+    amazon.aws.ec2_instance_info:
+      region: "{{ aws_region }}"
+      filters:
+        "tag-key": "kubernetes.io/cluster/{{ metadata_json.infraID }}"
+    register: cluster_instances
+
+  - name: Show discovered EC2 instances
+    debug:
+      var: cluster_instances
+
+  - name: Get available EBS volumes
+    amazon.aws.ec2_vol_info:
+      region: "{{ aws_region }}"
+      filters:
+        "tag:Environment": "{{ metadata_json.infraID }}-odf"
+    register: odf_volumes
+
+  - name: Prepare instance info list
+    set_fact:
+      instance_info_list: >-
+        {{
+          cluster_instances.instances
+          | map('extract', {
+              'instance_id': 'instance_id',
+              'availability_zone': 'placement.availability_zone'
+            })
+          | list
+        }}
+  
+  - name: Attach each EBS volume to an EC2 instance in the same AZ
+    loop: "{{ odf_volumes.volumes }}"
+    loop_control:
+      loop_var: volume
+      label: "{{ volume.volume_id }}"
+    amazon.aws.ec2_vol:
+      region: "{{ aws_region }}"
+      instance: >-
+        {{
+          instance_info_list
+          | selectattr('availability_zone', 'equalto', volume.availability_zone)
+          | map(attribute='instance_id')
+          | first
+        }}
+      volume_id: "{{ volume.volume_id }}"
+      device_name: "/dev/xvdb"
+      state: attached
+    when: >-
+      instance_info_list
+      | selectattr('availability_zone', 'equalto', volume.availability_zone)
+      | list
+      | length > 0
+  

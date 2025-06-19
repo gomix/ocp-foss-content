@@ -1,0 +1,6 @@
+aws_access_key: 
+aws_secret_key: 
+aws_region: eu-central-1
+aws_availability_zone_1: eu-central-1a
+aws_availability_zone_2: eu-central-1b
+aws_availability_zone_3: eu-central-1c

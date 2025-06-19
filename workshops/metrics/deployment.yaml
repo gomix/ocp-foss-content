@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-metrics
+  template:
+    metadata:
+      labels:
+        app: flask-metrics
+    spec:
+      containers:
+      - name: flask-metrics
+        image: image-registry.openshift-image-registry.svc:5000/metrics-ws/flask-metrics:latest
+        ports:
+        - containerPort: 8080
+        - containerPort: 8000
+          name: metrics
+
+

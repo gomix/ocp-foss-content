@@ -1,0 +1,9 @@
+General Script
+
+* Create AWS environment at demo.redhat.com.
+* Fill in vars in config.env.
+* run bash/cleanup.sh
+* run bash/config.sh
+
+TODO
+* Add vars to generate install-config.yaml

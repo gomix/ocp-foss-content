@@ -1,0 +1,105 @@
+--- 
+- name: Manage AWS EBS Volumes
+  hosts: localhost
+  gather_facts: no 
+  become: no
+  vars_files:
+    - vars/aws.yaml
+  vars:
+    volume_size: 500
+    volume_type: gp3
+    volume_tag_prefix: "odf-vol-"
+
+  tasks:
+    - name: Load OpenShift metadata.json
+      ansible.builtin.slurp:
+        src: ../metadata.json
+      register: metadata_json_raw
+
+    - name: Parse metadata.json
+      ansible.builtin.set_fact:
+        metadata_json: "{{ metadata_json_raw['content'] | b64decode | from_json }}"
+
+    - name: Define dynamic EBS variables (runtime)
+      ansible.builtin.set_fact:
+        aws_ebs_1:
+          region: "{{ aws_region }}"
+          availability_zone: "{{ aws_availability_zone_1 }}"
+          volume_type: "gp3"
+          volume_size: "500"
+          tags:
+            Name: "{{ metadata_json.infraID }}-odf-vol-1"
+            Environment: "{{ metadata_json.infraID }}-odf"
+        aws_ebs_2:
+          region: "{{ aws_region }}"
+          availability_zone: "{{ aws_availability_zone_2 }}"
+          volume_type: "gp3"
+          volume_size: "500"
+          tags:
+            Name: "{{ metadata_json.infraID }}-odf-vol-2"
+            Environment: "{{ metadata_json.infraID }}-odf"
+        aws_ebs_3:
+          region: "{{ aws_region }}"
+          availability_zone: "{{ aws_availability_zone_3 }}"
+          volume_type: "gp3"
+          volume_size: "500"
+          tags:
+            Name: "{{ metadata_json.infraID }}-odf-vol-3"
+            Environment: "{{ metadata_json.infraID }}-odf"
+
+    - name: Find existing EBS volume 1
+      amazon.aws.ec2_vol_info:
+        region: "{{ aws_ebs_1.region }}"
+        filters:
+          "tag:Name": "{{ aws_ebs_1.tags.Name }}"
+      register: existing_ebs_volume_1
+
+    - name: Create EBS volume 1
+      amazon.aws.ec2_vol:
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        region: "{{ aws_ebs_1.region }}"
+        availability_zone: "{{ aws_ebs_1.availability_zone }}"
+        volume_type: "{{ aws_ebs_1.volume_type }}"
+        volume_size: "{{ aws_ebs_1.volume_size | int }}"
+        state: present
+        tags: "{{ aws_ebs_1.tags }}"
+      when: existing_ebs_volume_1.volumes | length == 0
+
+    - name: Find existing EBS volume 2
+      amazon.aws.ec2_vol_info:
+        region: "{{ aws_ebs_2.region }}"
+        filters:
+          "tag:Name": "{{ aws_ebs_2.tags.Name }}"
+      register: existing_ebs_volume_2
+
+    - name: Create EBS volume 2
+      amazon.aws.ec2_vol:
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        region: "{{ aws_ebs_2.region }}"
+        availability_zone: "{{ aws_ebs_2.availability_zone }}"
+        volume_type: "{{ aws_ebs_2.volume_type }}"
+        volume_size: "{{ aws_ebs_2.volume_size | int }}"
+        state: present
+        tags: "{{ aws_ebs_2.tags }}"
+      when: existing_ebs_volume_2.volumes | length == 0
+
+    - name: Find existing EBS volume 3
+      amazon.aws.ec2_vol_info:
+        region: "{{ aws_ebs_3.region }}"
+        filters:
+          "tag:Name": "{{ aws_ebs_3.tags.Name }}"
+      register: existing_ebs_volume_3
+
+    - name: Create EBS volume 3
+      amazon.aws.ec2_vol:
+        aws_access_key: "{{ aws_access_key }}"
+        aws_secret_key: "{{ aws_secret_key }}"
+        region: "{{ aws_ebs_3.region }}"
+        availability_zone: "{{ aws_ebs_3.availability_zone }}"
+        volume_type: "{{ aws_ebs_3.volume_type }}"
+        volume_size: "{{ aws_ebs_3.volume_size | int }}"
+        state: present
+        tags: "{{ aws_ebs_3.tags }}"
+      when: existing_ebs_volume_2.volumes | length == 0
