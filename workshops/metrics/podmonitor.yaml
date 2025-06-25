@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: flask-metrics
+  namespace: metrics-ws
+  labels:
+    team: workshop
+spec:
+  selector:
+    matchLabels:
+      app: flask-metrics
+  podMetricsEndpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+
