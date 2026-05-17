@@ -34,4 +34,10 @@ spec:
       redundancyPolicy: ZeroRedundancy
   collection:
     type: vector
-    # type: fluentd 
+    vector:
+      transforms:
+        remote_elasticsearch_add_es_index:
+          type: "remap"
+          inputs: 
+          - "forward_to_remote_user_defined"
+          source: 'index = "default"'
